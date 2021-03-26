@@ -1,0 +1,74 @@
+﻿<Window
+    x:Class="TimeSpanDemo.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:TimeSpanDemo"
+    xmlns:local2="clr-namespace:TimeSpanHelper;assembly=TimeSpanHelper"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="TimeSpan Demo"
+    Width="800"
+    Height="450"
+    FontSize="13"
+    mc:Ignorable="d">
+    <Grid>
+        <StackPanel Margin="20,20" Orientation="Vertical">
+            <Label
+                Content="TextBox for TimeSpan"
+                FontSize="14"
+                FontWeight="Bold" />
+            <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
+                <Label Width="170" Content="Constant (invariant) format" />
+                <TextBox
+                    Width="150"
+                    Height="30"
+                    HorizontalContentAlignment="Right"
+                    VerticalContentAlignment="Center"
+                    FontSize="14"
+                    Text="{Binding Path=Time1, StringFormat={}{0:c}}" />
+                <TextBlock
+                    Margin="10,0,0,0"
+                    VerticalAlignment="Center"
+                    Text="1.01:00:00 --- 1 day 1 hour" />
+            </StackPanel>
+
+            <StackPanel Margin="0,20,0,0" Orientation="Horizontal">
+                <Label
+                    Width="170"
+                    VerticalAlignment="Center"
+                    Content="Converter(TotalHours)" />
+
+                <TextBox
+                    Width="150"
+                    Height="30"
+                    VerticalAlignment="Center"
+                    HorizontalContentAlignment="Right"
+                    VerticalContentAlignment="Center"
+                    FontSize="14">
+
+                    <TextBox.Text>
+                        <Binding
+                            Converter="{local2:TimeSpanToStringConverter}"
+                            ConverterParameter="true"
+                            Path="Time1">
+                            <Binding.ValidationRules>
+                                <local2:TimeSpanTextBoxRule Max="355.23:59:59" Min="-355.23:59:59" />
+                                <!--<local2:TimeSpanTextBoxRule />-->
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+
+                <TextBlock Margin="10,0,0,0">
+                    25:0:0 --- 25 hours.<LineBreak />
+                    Any char can be used as separator.<LineBreak />
+                    Max : 355 23 59 59  Min : -355 23 59 59<LineBreak />
+                    ConverterParameter : false. Total Hours unavailable</TextBlock>
+
+                <Label Content="" />
+            </StackPanel>
+
+
+        </StackPanel>
+    </Grid>
+</Window>
