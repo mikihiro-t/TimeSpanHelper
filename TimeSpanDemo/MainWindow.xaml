@@ -51,10 +51,10 @@
                             Converter="{local2:TimeSpanToStringConverter}"
                             ConverterParameter="true"
                             Path="Time1">
-                            <Binding.ValidationRules>
+                            <!--<Binding.ValidationRules>
                                 <local2:TimeSpanTextBoxRule Max="355.23:59:59" Min="-355.23:59:59" />
-                                <!--<local2:TimeSpanTextBoxRule />-->
-                            </Binding.ValidationRules>
+                                --><!--<local2:TimeSpanTextBoxRule />--><!--
+                            </Binding.ValidationRules>-->
                         </Binding>
                     </TextBox.Text>
                 </TextBox>

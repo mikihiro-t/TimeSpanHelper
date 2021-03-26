@@ -80,26 +80,6 @@ namespace TimeSpanHelper
 
             return new ValidationResult(true, null);
 
-
-
-            //var age = 0;
-
-            //try
-            //{
-            //    if (((string)value).Length > 0)
-            //        age = int.Parse((string)value);
-            //}
-            //catch (Exception e)
-            //{
-            //    return new ValidationResult(false, "Illegal characters or " + e.Message);
-            //}
-
-            //if ((age < Min) || (age > Max))
-            //{
-            //    return new ValidationResult(false,
-            //        "Please enter an age in the range: " + Min + " - " + Max + ".");
-            //}
-            //return new ValidationResult(true, null);
         }
     }
 
@@ -107,21 +87,21 @@ namespace TimeSpanHelper
     {
 
         /// <summary>
-        /// TimeSpanに変換できた時は、true。
-        /// 1つの数字がある時は、時間
-        /// 2つの数字がある時は、時間・分
-        /// 3つの数字がある時は、時間・分・秒
-        /// 4つの数字がある時は、日・時間・分・秒として、認識する。
+        /// 1 number : hours    "0" -> "0:0:0" ,    "-1" -> "-01:00:00"
+        /// 2 numbers : hours, minutes    "1:2" -> "01:02:00"
+        /// 3 numbers : hours, minutes, seconds    "1:2:3" -> "01:02:03"
+        /// 4 numbers : days, hours, minutes, seconds    "1:2:3:4" -> "1.02:03:04"
+        /// Any char can be used as separator.    "1,2 3aaaa4" -> "1.02:03:04"
         /// </summary>
-        /// <param name="timeSpanString">"0"→"0:0:0", "-1"→"-01:00:00", "1,2,3"→"01:02:03", "1:2:3:4"→"1.02:03:04"</param>
+        /// <param name="timeSpanString"></param>
         /// <param name="ts"></param>
-        /// <returns></returns>
+        /// <returns>true : conversion succeeded</returns>
         public static bool GetTimeSpan(string timeSpanString, ref TimeSpan ts)
         {
 
-            bool isNegative = timeSpanString.StartsWith("-");　// -で始まる時は、マイナス
-            var numberString = Regex.Replace(timeSpanString, "[^0-9]", " "); //" "で数字以外を置き換える。
-            var s = numberString.Split(' ', StringSplitOptions.RemoveEmptyEntries);　　//数字のみの配列（数字に"-"はつかない）
+            bool isNegative = timeSpanString.StartsWith("-"); // "-1:2:3" -> true
+            var digitsString = Regex.Replace(timeSpanString, "[^0-9]", " "); // "-1:2:3" -> " 1 2 3" 
+            var s = digitsString.Split(' ', StringSplitOptions.RemoveEmptyEntries); // "1","2","3"
 
             int days = 0;
             int hours = 0;
@@ -153,39 +133,20 @@ namespace TimeSpanHelper
                     break;
 
                 default:
-                    //数字がない時か、5個以上ある時は、TimeSpanに変換しない
-                    return false;
+                    return false; //no digits or length > 4
             }
 
-            //if (isNegative)
-            //{
-            //    days = days * (-1);
-            //    hours = hours * (-1);
-            //    minutes = minutes * (-1);
-            //    seconds = seconds * (-1);
-            //}
-            if (!isNegative)
+            if (isNegative)
             {
-                ts = new TimeSpan(days, hours, minutes, seconds);
+                ts = new TimeSpan(-days, -hours, -minutes, -seconds);
             }
             else
             {
-                ts = new TimeSpan(-days, -hours, -minutes, -seconds);
+                ts = new TimeSpan(days, hours, minutes, seconds);
             }
 
             return true;
         }
 
-        public static int GetNumbersAsInt(string input)
-        {
-            var output = "";
-            Char[] chars = input.ToCharArray(0, input.Length);
-            for (int i = 0; i < chars.Length; i++)
-            {
-                if (Char.IsNumber(chars[i]) == true)
-                    output = output + chars[i];
-            }
-            return int.Parse(output);
-        }
     }
 }
