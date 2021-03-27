@@ -11,39 +11,42 @@ namespace TimeSpanHelper
     public class TimeSpanToStringConverter : MarkupExtension, IValueConverter
     {
         /// <summary>
-        /// VMのプロパティのTimeSpanを時間+分+秒で表示する。
-        /// ConverterParameter をfalseにしておくと、Convertを利用しない。その時は、TimeSpanのまま、TextBoxに渡す。
+        /// Convert TimeSpan to string "Hours:Minutes:Seconds". Over 24 Hours Ok. 
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="value">TimeSpan</param>
         /// <param name="targetType"></param>
-        /// <param name="parameter"></param>
+        /// <param name="parameter">ConverterParameter Optional.　StringFormat. Replace {SumHours}, {Minutes}, {Seconds}</param>
         /// <param name="culture"></param>
         /// <returns></returns>
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is null) return "";
-            if (parameter is not null && bool.Parse((string)parameter) == false) return value;
 
-            var ts = (TimeSpan)value;
-            var hourOnly = (int)ts.TotalHours;  //マイナス表示もある
-            var minutes = Math.Abs(ts.Minutes);    //マイナスの時は、hourOnlyで表示するので、数字のみにする。
-            var secornds = Math.Abs(ts.Seconds);
-            return $@"{hourOnly}:{minutes}:{secornds}";
+            var ts = (TimeSpan)value; // ex : negative TimeSpanString "-1:2:3"
+            var sumHours = (int)ts.TotalHours;  // -1.0341666666666667 to -1
+            var minutes = Math.Abs(ts.Minutes);    // -2 to 2
+            var seconds = Math.Abs(ts.Seconds);  // -3 to 3 
+
+            if (parameter is null)
+            {
+                return $@"{sumHours}:{minutes}:{seconds}";
+            }
+            else
+            {
+                var format = (string)parameter;
+                return format.Replace("{SumHours}", sumHours.ToString()).Replace("{Minutes}", minutes.ToString()).Replace("{Seconds}", seconds.ToString());
+            }
+
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
 
-            if (string.IsNullOrEmpty((string)value)) return null; //""や空白の時は、バインディングされているTimeをnullにする。
+            if (string.IsNullOrEmpty((string)value)) return null; //If TextBox.Text is null or empty, set Binding TimeSpanProperty to null
 
             TimeSpan ts = new();
             var rt = TimeSpanUtils.GetTimeSpan((string)value, ref ts);
-            return rt ? ts : DependencyProperty.UnsetValue;
-            //return rt ? ts : Binding.DoNothing;  //TimeSpanに変更できない時は、バインディング先のTimeに何もしない。ただし、TimeSpanTextBoxRuleで、TimeSpanに変換できない時は、ConvertBackされないはず。
-
-            //https://take4-blue.com/program/wpf%E3%82%92%E4%BD%BF%E3%81%86-%E3%83%A9%E3%82%B8%E3%82%AA%E3%83%9C%E3%82%BF%E3%83%B3%E3%81%A8enum/
-
-
+            return rt ? ts : DependencyProperty.UnsetValue;  // Better than "Binding.DoNothing" ?
         }
 
         public override object ProvideValue(IServiceProvider serviceProvider)
@@ -53,18 +56,19 @@ namespace TimeSpanHelper
     }
 
 
-    /// <summary>
-    /// https://stackoverflow.com/questions/2728321/how-to-parse-string-with-hours-greater-than-24-to-timespan
-    /// https://araramistudio.jimdo.com/2016/09/16/wpf%E3%81%AE%E5%85%A5%E5%8A%9B%E8%A6%8F%E5%88%B6%E3%82%92%E3%82%AB%E3%82%B9%E3%82%BF%E3%83%9E%E3%82%A4%E3%82%BA/
-    /// https://github.com/microsoft/WPF-Samples/blob/master/Data%20Binding/BindValidation/MainWindow.xaml
-    /// </summary>
     public class TimeSpanTextBoxRule : ValidationRule
     {
+
         /// <summary>
-        /// 入力できる最小値。指定しないとnull。
+        /// Optional.Input Range Max
+        /// </summary>
+        public TimeSpan? Max { get; set; }
+
+        /// <summary>
+        /// Optional.Input Range Min
         /// </summary>
         public TimeSpan? Min { get; set; }
-        public TimeSpan? Max { get; set; }
+
 
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
@@ -72,11 +76,10 @@ namespace TimeSpanHelper
 
             TimeSpan ts = new();
             var rt = TimeSpanUtils.GetTimeSpan((string)value, ref ts);
-            if (!rt) return new ValidationResult(false, "TimeSpanに変換できません。");
+            if (!rt) return new ValidationResult(false, "convert exception");
 
-            if (Min is not null && ts < Min) return new ValidationResult(false, $@"{Min}以上で入力して下さい。");
-            if (Max is not null && ts > Max) return new ValidationResult(false, $@"{Max}以下で入力して下さい。");
-
+            if (Min is not null && ts < Min) return new ValidationResult(false, $@"Min: {Min} out of range");
+            if (Max is not null && ts > Max) return new ValidationResult(false, $@"Max: {Max} out of range");
 
             return new ValidationResult(true, null);
 
@@ -87,11 +90,11 @@ namespace TimeSpanHelper
     {
 
         /// <summary>
-        /// 1 number : hours    "0" -> "0:0:0" ,    "-1" -> "-01:00:00"
-        /// 2 numbers : hours, minutes    "1:2" -> "01:02:00"
-        /// 3 numbers : hours, minutes, seconds    "1:2:3" -> "01:02:03"
-        /// 4 numbers : days, hours, minutes, seconds    "1:2:3:4" -> "1.02:03:04"
-        /// Any char can be used as separator.    "1,2 3aaaa4" -> "1.02:03:04"
+        /// 1 number : hours    "0" to "0:0:0" ,    "-1" to "-01:00:00"
+        /// 2 numbers : hours, minutes    "1:2" to "01:02:00"
+        /// 3 numbers : hours, minutes, seconds    "1:2:3" to "01:02:03"
+        /// 4 numbers : days, hours, minutes, seconds    "1:2:3:4" to "1.02:03:04"
+        /// Any char can be used as separator.    "1,2 3aaaa4" to "1.02:03:04"
         /// </summary>
         /// <param name="timeSpanString"></param>
         /// <param name="ts"></param>
@@ -99,8 +102,8 @@ namespace TimeSpanHelper
         public static bool GetTimeSpan(string timeSpanString, ref TimeSpan ts)
         {
 
-            bool isNegative = timeSpanString.StartsWith("-"); // "-1:2:3" -> true
-            var digitsString = Regex.Replace(timeSpanString, "[^0-9]", " "); // "-1:2:3" -> " 1 2 3" 
+            bool isNegative = timeSpanString.StartsWith("-"); // "-1:2:3" is true
+            var digitsString = Regex.Replace(timeSpanString, "[^0-9]", " "); // "-1:2:3" to " 1 2 3" 
             var s = digitsString.Split(' ', StringSplitOptions.RemoveEmptyEntries); // "1","2","3"
 
             int days = 0;

@@ -15,10 +15,12 @@
         <StackPanel Margin="20,20" Orientation="Vertical">
             <Label
                 Content="TextBox for TimeSpan"
-                FontSize="14"
+                FontSize="16"
                 FontWeight="Bold" />
+
+            <!--#region Time1-->
             <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
-                <Label Width="170" Content="Constant (invariant) format" />
+                <Label Width="170" Content="No Converter" />
                 <TextBox
                     Width="150"
                     Height="30"
@@ -26,17 +28,78 @@
                     VerticalContentAlignment="Center"
                     FontSize="14"
                     Text="{Binding Path=Time1, StringFormat={}{0:c}}" />
-                <TextBlock
-                    Margin="10,0,0,0"
-                    VerticalAlignment="Center"
-                    Text="1.01:00:00 --- 1 day 1 hour" />
+                <TextBlock Margin="10,0,0,0" VerticalAlignment="Center">
+                    Constant (invariant) format<LineBreak />
+                    1.01:00:00 --- 1 day 1 hour</TextBlock>
             </StackPanel>
+            <!--#endregion-->
 
+            <!--#region Time2-->
             <StackPanel Margin="0,20,0,0" Orientation="Horizontal">
                 <Label
                     Width="170"
                     VerticalAlignment="Center"
-                    Content="Converter(TotalHours)" />
+                    Content="Converter(Over 24Hours)" />
+
+                <TextBox
+                    Width="150"
+                    Height="30"
+                    VerticalAlignment="Center"
+                    HorizontalContentAlignment="Right"
+                    VerticalContentAlignment="Center"
+                    FontSize="14">
+
+                    <TextBox.Text>
+                        <Binding Converter="{local2:TimeSpanToStringConverter}" Path="Time2">
+                            <Binding.ValidationRules>
+                                <local2:TimeSpanTextBoxRule />
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+
+                <TextBlock Margin="10,0,0,0">
+                    25:0:0 --- 25 hours.<LineBreak />
+                    Any char can be used as separator.</TextBlock>
+            </StackPanel>
+            <!--#endregion-->
+
+            <!--#region Time3-->
+            <StackPanel Margin="0,20,0,0" Orientation="Horizontal">
+                <Label
+                    Width="170"
+                    VerticalAlignment="Center"
+                    Content="ValidationRules Max, Min" />
+
+                <TextBox
+                    Width="150"
+                    Height="30"
+                    VerticalAlignment="Center"
+                    HorizontalContentAlignment="Right"
+                    VerticalContentAlignment="Center"
+                    FontSize="14">
+
+                    <TextBox.Text>
+                        <Binding Converter="{local2:TimeSpanToStringConverter}" Path="Time3">
+                            <Binding.ValidationRules>
+                                <local2:TimeSpanTextBoxRule Max="355.23:59:59" Min="-355.23:59:59" />
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+
+                <TextBlock Margin="10,0,0,0">
+                    Max : 355 23 59 59  Min : -355 23 59 59
+                </TextBlock>
+            </StackPanel>
+            <!--#endregion-->
+
+            <!--#region Time4-->
+            <StackPanel Margin="0,20,0,0" Orientation="Horizontal">
+                <Label
+                    Width="170"
+                    VerticalAlignment="Center"
+                    Content="ConverterParameter" />
 
                 <TextBox
                     Width="150"
@@ -49,25 +112,20 @@
                     <TextBox.Text>
                         <Binding
                             Converter="{local2:TimeSpanToStringConverter}"
-                            ConverterParameter="true"
-                            Path="Time1">
-                            <!--<Binding.ValidationRules>
-                                <local2:TimeSpanTextBoxRule Max="355.23:59:59" Min="-355.23:59:59" />
-                                --><!--<local2:TimeSpanTextBoxRule />--><!--
-                            </Binding.ValidationRules>-->
+                            ConverterParameter="{}{SumHours}h {Minutes}m {Seconds}s"
+                            Path="Time4">
+                            <Binding.ValidationRules>
+                                <local2:TimeSpanTextBoxRule />
+                            </Binding.ValidationRules>
                         </Binding>
                     </TextBox.Text>
                 </TextBox>
 
                 <TextBlock Margin="10,0,0,0">
-                    25:0:0 --- 25 hours.<LineBreak />
-                    Any char can be used as separator.<LineBreak />
-                    Max : 355 23 59 59  Min : -355 23 59 59<LineBreak />
-                    ConverterParameter : false. Total Hours unavailable</TextBlock>
-
-                <Label Content="" />
+                    {}{SumHours}h {Minutes}m {Seconds}s
+                </TextBlock>
             </StackPanel>
-
+            <!--#endregion-->
 
         </StackPanel>
     </Grid>

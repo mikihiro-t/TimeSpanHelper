@@ -25,6 +25,28 @@ namespace TimeSpanDemo
             get => time1;
             set => SetField(ref time1, value);
         }
+
+        private TimeSpan? _time2;
+        public TimeSpan? Time2
+        {
+            get => _time2;
+            set => SetField(ref _time2, value);
+        }
+
+        private TimeSpan? _time3;
+        public TimeSpan? Time3
+        {
+            get => _time3;
+            set => SetField(ref _time3, value);
+        }
+
+        private TimeSpan? _time4;
+        public TimeSpan? Time4
+        {
+            get => _time4;
+            set => SetField(ref _time4, value);
+        }
+
         public MainWindow()
         {
             InitializeComponent();
