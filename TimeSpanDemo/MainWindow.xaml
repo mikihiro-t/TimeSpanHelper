@@ -11,6 +11,21 @@
     Height="450"
     FontSize="13"
     mc:Ignorable="d">
+    <Window.Resources>
+        <ControlTemplate x:Key="ValidationTemplate">
+            <StackPanel>
+                <ItemsControl ItemsSource="{Binding}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Foreground="Red" Text="{Binding ErrorContent}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <AdornedElementPlaceholder x:Name="adorner" />
+            </StackPanel>
+        </ControlTemplate>
+    </Window.Resources>
+
     <Grid>
         <StackPanel Margin="20,20" Orientation="Vertical">
             <Label
@@ -27,7 +42,8 @@
                     HorizontalContentAlignment="Right"
                     VerticalContentAlignment="Center"
                     FontSize="14"
-                    Text="{Binding Path=Time1, StringFormat={}{0:c}}" />
+                    Text="{Binding Path=Time1, StringFormat={}{0:c}}"
+                    Validation.ErrorTemplate="{StaticResource ValidationTemplate}" />
                 <TextBlock Margin="10,0,0,0" VerticalAlignment="Center">
                     Constant (invariant) format<LineBreak />
                     1.01:00:00 --- 1 day 1 hour</TextBlock>
@@ -47,7 +63,8 @@
                     VerticalAlignment="Center"
                     HorizontalContentAlignment="Right"
                     VerticalContentAlignment="Center"
-                    FontSize="14">
+                    FontSize="14"
+                    Validation.ErrorTemplate="{StaticResource ValidationTemplate}">
 
                     <TextBox.Text>
                         <Binding Converter="{local2:TimeSpanToStringConverter}" Path="Time2">
@@ -77,7 +94,8 @@
                     VerticalAlignment="Center"
                     HorizontalContentAlignment="Right"
                     VerticalContentAlignment="Center"
-                    FontSize="14">
+                    FontSize="14"
+                    Validation.ErrorTemplate="{StaticResource ValidationTemplate}">
 
                     <TextBox.Text>
                         <Binding Converter="{local2:TimeSpanToStringConverter}" Path="Time3">
@@ -99,6 +117,37 @@
                 <Label
                     Width="170"
                     VerticalAlignment="Center"
+                    Content="ValidationRules ShortTime" />
+
+                <TextBox
+                    Width="150"
+                    Height="30"
+                    VerticalAlignment="Center"
+                    HorizontalContentAlignment="Right"
+                    VerticalContentAlignment="Center"
+                    FontSize="14"
+                    Validation.ErrorTemplate="{StaticResource ValidationTemplate}">
+
+                    <TextBox.Text>
+                        <Binding Converter="{local2:TimeSpanToStringConverter}" Path="Time4">
+                            <Binding.ValidationRules>
+                                <local2:TimeSpanTextBoxRule IsShortTime="True" />
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+
+                <TextBlock Margin="10,0,0,0">
+                    Seconds should be 0.
+                </TextBlock>
+            </StackPanel>
+            <!--#endregion-->
+
+            <!--#region Time5-->
+            <StackPanel Margin="0,20,0,0" Orientation="Horizontal">
+                <Label
+                    Width="170"
+                    VerticalAlignment="Center"
                     Content="ConverterParameter" />
 
                 <TextBox
@@ -107,13 +156,14 @@
                     VerticalAlignment="Center"
                     HorizontalContentAlignment="Right"
                     VerticalContentAlignment="Center"
-                    FontSize="14">
+                    FontSize="14"
+                    Validation.ErrorTemplate="{StaticResource ValidationTemplate}">
 
                     <TextBox.Text>
                         <Binding
                             Converter="{local2:TimeSpanToStringConverter}"
-                            ConverterParameter="{}{SumHours}h {Minutes}m {Seconds}s"
-                            Path="Time4">
+                            ConverterParameter="'{Sign}'d'd 'hh'h 'mm'm 'ss's'"
+                            Path="Time5">
                             <Binding.ValidationRules>
                                 <local2:TimeSpanTextBoxRule />
                             </Binding.ValidationRules>
@@ -122,11 +172,37 @@
                 </TextBox>
 
                 <TextBlock Margin="10,0,0,0">
-                    {}{SumHours}h {Minutes}m {Seconds}s
+                    '{Sign}'d'd 'hh'h 'mm'm 'ss's'
                 </TextBlock>
             </StackPanel>
             <!--#endregion-->
 
+            <!--#region Time2 TextBlock-->
+            <StackPanel Margin="0,20,0,0" Orientation="Horizontal">
+                <Label
+                    Width="170"
+                    VerticalAlignment="Center"
+                    Content="TextBlock" />
+
+                <TextBlock
+                    Width="150"
+                    Height="30"
+                    VerticalAlignment="Center"
+                    FontSize="14">
+
+                    <TextBlock.Text>
+                        <Binding
+                            Converter="{local2:TimeSpanToStringConverter}"
+                            ConverterParameter="'{SumHours}'\:mm\:ss"
+                            Path="Time2" />
+                    </TextBlock.Text>
+                </TextBlock>
+                <TextBlock Margin="10,0,0,0">
+                    '{SumHours}'\:mm\:ss
+                </TextBlock>
+
+            </StackPanel>
+            <!--#endregion-->
         </StackPanel>
     </Grid>
 </Window>
